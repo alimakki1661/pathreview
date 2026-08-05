@@ -73,3 +73,40 @@ Updated `tests/unit/test_review_service.py` to correctly mock single-result, emp
 Full verification was completed. `make check` reported 174 pre-existing repository-wide Ruff errors unrelated to this PR. `make test-unit` produced 388 passed tests and 40 unrelated failures. None of those failures involved `tests/unit/test_review_service.py`, whose targeted suite passed all 19 tests. Ruff and Black also passed for the changed test file. Under the course instructions, the boxes are checked because this contribution introduced no new failures.
 
 **Draft PR feedback received from:** none
+
+## Week 10 — Iteration & reflection
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No — still awaiting review
+
+**Summary of feedback:**
+
+No reviewer or maintainer feedback was received during the module. I requested a review and left the pull request open and ready for review, but no comments were submitted before the deadline.
+
+**How you responded:**
+
+
+---
+
+### Reflection
+
+**What was harder than you expected?**
+
+The hardest part was understanding exactly where asynchronous behavior ended in the SQLAlchemy workflow. The database session's `execute()` method must be awaited, but the result object's `scalars()`, `first()`, and `all()` methods are synchronous. Using `AsyncMock` too broadly caused coroutine objects to appear where the service expected normal values. Debugging was also complicated by repository-wide linting, typing, and test failures that were unrelated to issue #158. I had to separate those baseline problems from failures caused by my own changes instead of assuming every failing command meant my fix was incorrect.
+
+**What did you learn about working in a large codebase?**
+
+I learned that contributing to an existing codebase requires more discipline than building a project alone. It was important to reproduce the original failure, understand the existing test patterns, follow the repository's branch and commit conventions, and keep the fix limited to the issue's scope. I also learned that a repository may already contain failing checks, so contributors need to record the baseline and prove that their changes do not introduce additional failures. A technically working fix is not enough by itself; the tests, documentation, commit history, and pull-request description all form part of the contribution.
+
+**How did AI tools help — and where did they fall short?**
+
+AI tools were most useful for explaining the difference between an asynchronous database call and a synchronous SQLAlchemy result object, identifying why `AsyncMock` caused the coroutine errors, and helping me interpret test and pre-commit output. AI also helped organize my reproduction notes, implementation plan, journal entries, and pull-request description. However, AI-generated changes still needed manual verification. Some intermediate edits introduced simple problems such as undefined variables, and a passing test did not always mean that its assertions were meaningful. I needed to inspect the actual service behavior, compare the mocks with SQLAlchemy's interface, run the tests myself, and confirm that each suggestion matched the repository's conventions.
+
+**What would you do differently if you started over?**
+
+I would run and save the full baseline results from `make check` and `make test-unit` before editing anything. That would make it easier to distinguish existing failures from regressions caused by my work. I would also inspect `CONTRIBUTING.md` and the service implementation earlier, then change one mock pattern at a time and rerun the targeted test file after every small edit. Finally, I would open the draft pull request and request peer feedback earlier so reviewers had more time to respond before the submission deadline.
+
+**What are you most proud of from this module?**
+
+I am most proud that I traced the failures to an inaccurate test double rather than changing working production code to satisfy broken tests. The review-service suite improved from 13 failures and 6 passes to all 19 tests passing, while the final change remained focused on `tests/unit/test_review_service.py`. I also documented the unrelated repository-wide failures honestly instead of claiming that every project check passed cleanly.
